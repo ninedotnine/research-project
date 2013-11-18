@@ -16,6 +16,7 @@ maplang() {
         # c|cpp|cc|cxx|h|hpp|hh|hxx)
         c)
             # lang=c
+            # assume c99 standard, since it's (mostly) backward compatible
             dynamic_cmd="gcc -Wall -pedantic -std=c99 -o $file-dynamic $1"
             static_cmd="gcc -Wall -pedantic -std=c99 -o $file-static $1 -static"
             ;;
@@ -54,8 +55,8 @@ for arg in "$@"; do
     echo ""
 
     # time executions
-    time ./$file-static
-    time ./$file-static-stripped
-    time ./$file-dynamic
-    time ./$file-dynamic-stripped
+    time ./$file-static >> /dev/null
+    time ./$file-static-stripped >> /dev/null
+    time ./$file-dynamic >> /dev/null
+    time ./$file-dynamic-stripped >> /dev/null
 done
