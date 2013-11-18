@@ -1,0 +1,7 @@
+a.out
+*.o
+*.hi
+temp
+*-dynamic
+*-static
+.*.swp
