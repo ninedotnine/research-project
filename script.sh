@@ -33,11 +33,11 @@ maplang() {
 }
 
 for arg in "$@"; do
-    maplang $arg
+    maplang "$arg"
 
     # compile each once first so as not to get an unfair 'cold' start 
-    $dynamic_cmd >> /dev/null
-    $static_cmd >> /dev/null
+    $dynamic_cmd >> /dev/null 2>&1
+    $static_cmd >> /dev/null 2>&1
 
     # time and compile
     echo -e "\033[1m$dynamic_cmd\033[0m"
@@ -49,5 +49,13 @@ for arg in "$@"; do
     strip "$file-static" -o "$file-static-stripped"
     strip "$file-dynamic" -o "$file-dynamic-stripped"
 
+    echo ""
     ls -1 --size --human-readable $file-*
+    echo ""
+
+    # time executions
+    time ./$file-static
+    time ./$file-static-stripped
+    time ./$file-dynamic
+    time ./$file-dynamic-stripped
 done
