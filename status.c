@@ -21,10 +21,6 @@
 #define PKGFILE "/tmp/dwm-status.packages"
 #define FBCMDFILE "/tmp/dwm-status.fbcmd"
 
-// ideally this would only be defined if i knew zenity was installed
-// but fuck that, right???? who even needs makefiles
-#define zenity
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -86,9 +82,9 @@ static int getbattery(void) {
             fprintf(stderr, "issuing low battery warning\n");
             system("zenity --warning \
                     --text=\"charge my fuckin' battery!\""); 
-#endif
         } 
     }
+#endif
     return capacity;
 }
 
@@ -136,13 +132,15 @@ int main(void) {
         return EXIT_FAILURE;
     }
     
-    for (double *avgs; ; sleep(59)) {
-        avgs = getavgs();
-        snprintf(status, 90, OUTFORMAT, avgs[0], avgs[1], avgs[2],
-                 getbattery(), getfiledata(MAILFILE), 
-                 getfiledata(PKGFILE), net(), getdatetime());
-        printf("%s\n", status);
-    }
+    double *avgs;
+    // just run once and quit, don't loop for our purposes
+    // for (; ; sleep(59)) {
+    avgs = getavgs();
+    snprintf(status, 90, OUTFORMAT, avgs[0], avgs[1], avgs[2],
+             getbattery(), getfiledata(MAILFILE), 
+             getfiledata(PKGFILE), net(), getdatetime());
+    printf("%s\n", status);
+    // }
 
 
     free(status);
