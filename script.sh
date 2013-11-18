@@ -5,13 +5,11 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-
-
 maplang() {
     # local file="$1"
     local ext=${1##*.}
-    local file=$(basename "$1" ".$ext")
-    lang=""
+    file=$(basename "$1" ".$ext")
+    # lang=""
 
     # based on file name
     case $ext in
@@ -32,20 +30,24 @@ maplang() {
             static_cmd="ghc -Wall -o $file-static $1"
             ;;
     esac
+}
+
+for arg in "$@"; do
+    maplang $arg
 
     # compile each once first so as not to get an unfair 'cold' start 
-    $dynamic_cmd
-    $static_cmd
+    $dynamic_cmd >> /dev/null
+    $static_cmd >> /dev/null
 
     # time and compile
     echo -e "\033[1m$dynamic_cmd\033[0m"
     time $dynamic_cmd
     echo -e "\033[1m$static_cmd\033[0m"
     time $static_cmd
-    
-    ls -1 --size --human-readable "$file-dynamic" "$file-static"
-}
 
-maplang $1
+    # strip files, output them elsewhere
+    strip "$file-static" -o "$file-static-stripped"
+    strip "$file-dynamic" -o "$file-dynamic-stripped"
 
-
+    ls -1 --size --human-readable $file-*
+done
