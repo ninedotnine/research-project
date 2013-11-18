@@ -33,6 +33,10 @@ maplang() {
             ;;
     esac
 
+    # compile each once first so as not to get an unfair 'cold' start 
+    $dynamic_cmd
+    $static_cmd
+
     # time and compile
     echo -e "\033[1m$dynamic_cmd\033[0m"
     time $dynamic_cmd
