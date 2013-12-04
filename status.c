@@ -117,7 +117,8 @@ double *getavgs(void) {
             num_avgs = 0;
         } 
         // populate the rest of the array with meaningless doubles
-        for (int i = num_avgs; i < 3; i++) {
+        int i;
+        for (i = num_avgs; i < 3; i++) {
             avgs[i] = 9.9;
         }
     }
