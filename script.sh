@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# to-do: make another stream for the programs' output
+
 if [ "$#" -lt 1 ]; then
     echo "needs an argument"
     exit 1
@@ -16,19 +18,25 @@ maplang() {
         # c|cpp|cc|cxx|h|hpp|hh|hxx)
         c)
             # lang=c
-            # assume c99 standard, since it's (mostly) backward compatible
-            dynamic_cmd="gcc -Wall -pedantic -std=c99 -o $file-dynamic $1"
-            static_cmd="gcc -Wall -pedantic -std=c99 -o $file-static $1 -static"
+            # assume c99 standard, it's (mostly) backward compatible
+            # dynamic_cmd="gcc -Wall -pedantic -std=c99 -o $file-dynamic $1"
+            dynamic_cmd="gcc -o $file-dynamic $1"
+            # static_cmd="gcc -Wall -pedantic -std=c99 -o $file-static $1 -static"
+            static_cmd="gcc -o $file-static $1 -static"
             ;;
         f90|f95)
             # lang=fortran
-            dynamic_cmd="gfortran -Wall -pedantic -o $file-dynamic $1"
-            static_cmd="gfortran -Wall -pedantic -o $file-static $1 -static"
+            # dynamic_cmd="gfortran -Wall -pedantic -o $file-dynamic $1"
+            dynamic_cmd="gfortran -o $file-dynamic $1"
+            # static_cmd="gfortran -Wall -pedantic -o $file-static $1 -static"
+            static_cmd="gfortran -o $file-static $1 -static"
             ;;
         hs)
             # lang=haskell
-            dynamic_cmd="ghc -Wall -o $file-dynamic $1 -dynamic"
-            static_cmd="ghc -Wall -o $file-static $1"
+            # dynamic_cmd="ghc -Wall -o $file-dynamic $1 -dynamic"
+            dynamic_cmd="ghc -o $file-dynamic $1 -dynamic"
+            # static_cmd="ghc -Wall -o $file-static $1"
+            static_cmd="ghc -o $file-static $1"
             ;;
     esac
 }
@@ -55,8 +63,12 @@ for arg in "$@"; do
     echo ""
 
     # time executions
+    echo -e "\033[1m$file-static\033[0m" 
     time ./$file-static >> /dev/null
+    echo -e "\033[1m$file-static-stripped\033[0m" 
     time ./$file-static-stripped >> /dev/null
+    echo -e "\033[1m$file-dynamic\033[0m" 
     time ./$file-dynamic >> /dev/null
+    echo -e "\033[1m$file-dynamic-stripped\033[0m" 
     time ./$file-dynamic-stripped >> /dev/null
 done
