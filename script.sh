@@ -1,11 +1,29 @@
 #!/bin/bash
 
-# to-do: make another stream for the programs' output
-
 if [ "$#" -lt 1 ]; then
     echo "needs an argument"
     exit 1
 fi
+
+while getopts "ceh" option; do
+    case $option in
+        "c") 
+            COMPILE=1
+        ;;
+        "e") 
+            EXECUTE=1
+        ;;
+        "h")
+            echo -e "args: \n-c: test compilation\n-e: test execution"
+            exit 0
+        ;;
+        [?])
+            echo -e "args: \n-c: test compilation\n-e: test execution"
+            exit 1
+        ;;
+    esac
+    shift
+done
 
 maplang() {
     # local file="$1"
@@ -41,9 +59,7 @@ maplang() {
     esac
 }
 
-for arg in "$@"; do
-    maplang "$arg"
-
+compiletest() {
     # compile each once first so as not to get an unfair 'cold' start 
     $dynamic_cmd >> /dev/null 2>&1
     $static_cmd >> /dev/null 2>&1
@@ -61,7 +77,9 @@ for arg in "$@"; do
     echo ""
     ls -1 --size --human-readable $file-*
     echo ""
+}
 
+executetest() {
     # time executions
     echo -e "\033[1m$file-static\033[0m" 
     time ./$file-static >> /dev/null
@@ -71,4 +89,20 @@ for arg in "$@"; do
     time ./$file-dynamic >> /dev/null
     echo -e "\033[1m$file-dynamic-stripped\033[0m" 
     time ./$file-dynamic-stripped >> /dev/null
+}
+   
+for arg in "$@"; do
+    maplang "$arg"
+
+    if [[ -n "$COMPILE" ]]; then
+        echo "compiling! $arg"
+        compiletest "$arg"
+    fi
+
+    if [[ -n "$EXECUTE" ]]; then
+        echo "executing! $arg"
+        executetest "$arg"
+    fi
+     
+    exit 0
 done
