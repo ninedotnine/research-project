@@ -1,6 +1,7 @@
 /* 
  * 9.9
  * writes a handy status message to stdout
+ * this is a trimmed-down version of the real one, for research project purposes
  * compile with: gcc -Wall -pedantic -std=c99 dwm-status.c
  * last updated aug 16 2013
  */
@@ -13,13 +14,12 @@
 // the format for the date/time
 #define TIMESTRING "[%a %b %d] %H:%M"
 // the format for everything
-#define OUTFORMAT "[%.2f %.2f %.2f] [batt: %d%%] [mail %d] [pkg %d] [net %s] %s"
+#define OUTFORMAT "[%.2f %.2f %.2f] [batt: %d%%] [mail %d] [pkg %d] %s"
 // level to warn on low battery
 #define WARN_LOW_BATT 12
 // files -- populated by cron
 #define MAILFILE "/tmp/dwm-status.mail"
 #define PKGFILE "/tmp/dwm-status.packages"
-#define FBCMDFILE "/tmp/dwm-status.fbcmd"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +36,6 @@ static char *getdatetime(void) {
         fprintf(stderr, "Cannot allocate memory for buf.\n");
         return "time ???";
     }
-    result = time(NULL);
     resulttm = localtime(&result);
     if (resulttm == NULL) {
         fprintf(stderr, "Error getting localtime.\n");
@@ -53,7 +52,8 @@ static int getfiledata(const char *filename) {
     // read an int from filename
     FILE *fd = fopen(filename, "r");
     if (fd == NULL) {
-        fprintf(stderr, "error in getfiledata(): file not found: '%s'\n", filename);
+        fprintf(stderr, "error in getfiledata(): file not found: '%s'\n",
+                filename);
         return -1;
     }
     int result;
@@ -88,25 +88,6 @@ static int getbattery(void) {
     return capacity;
 }
 
-static char *net(void) {
-    // returns "ON" or "OFF"
-    FILE *fp;
-    fp = popen("ping -c 1 -W 1 google.com > /dev/null 2>&1 && \
-               echo 'ON' || echo 'OFF'", "r");
-    if (fp == NULL) {
-        return "err";
-    } 
-    char *output = malloc(4);
-    fgets(output, 4, fp);
-    pclose(fp);
-
-    // the last character might be an unwanted newline
-    if (output[strlen(output)-1] == '\n') {
-        output[strlen(output)-1] = '\0';
-    }
-    return output;
-}
-
 double *getavgs(void) {
     // load averages. must return exactly 3 doubles 
     double *avgs = malloc(3 * sizeof(double));
@@ -125,24 +106,18 @@ double *getavgs(void) {
     return avgs;
 }
 
-
 int main(void) {
     char *status;
     if ((status = malloc(80)) == NULL) {
         fprintf(stderr, "status = malloc(80) failed.\n");
         return EXIT_FAILURE;
     }
-    
-    double *avgs;
-    // just run once and quit, don't loop for our purposes
-    // for (; ; sleep(59)) {
-    avgs = getavgs();
+
+    double *avgs = getavgs();
     snprintf(status, 90, OUTFORMAT, avgs[0], avgs[1], avgs[2],
              getbattery(), getfiledata(MAILFILE), 
-             getfiledata(PKGFILE), net(), getdatetime());
+             getfiledata(PKGFILE), getdatetime());
     printf("%s\n", status);
-    // }
-
 
     free(status);
     return 0;
